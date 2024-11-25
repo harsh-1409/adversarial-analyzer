@@ -26,7 +26,7 @@ if uploaded_file is not None:
             # Send the file to the backend when "Submit" is clicked
             files = {"file": uploaded_file.getvalue()}
             response = requests.post(
-                f"http://127.0.0.1:5000/upload?epsilon={epsilon}",
+                f"https://adversarial-analyzer.onrender.com/upload?epsilon={epsilon}",
                 files=files
             )
 

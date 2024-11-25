@@ -91,6 +91,7 @@ def upload_file():
         adv_label = labels[adv_class]
 
         adv_img = (adv_img * 255).astype(np.uint8)
+
         adv_img = Image.fromarray(adv_img)
         buffer = io.BytesIO()
         adv_img.save(buffer, format='PNG')

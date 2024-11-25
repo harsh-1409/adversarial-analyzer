@@ -1,3 +1,4 @@
+import io
 import os
 from flask import Flask, request, jsonify
 from torchvision import models, transforms
@@ -7,7 +8,7 @@ import torch
 import numpy as np
 from PIL import Image
 import json
-
+import base64
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -68,7 +69,7 @@ def upload_file():
         img = Image.open(file_path).convert('RGB')
         img_tensor = preprocess(img).unsqueeze(0) #Unsqueeze to add batch dimension
         
-        epsilon = float(request.args.get('epsilon', 0.5))
+        epsilon = float(request.args.get('epsilon', 0.3))
 
         adv_img_tensor = generate_adversarial_example(model, img_tensor, epsilon)
         
@@ -89,6 +90,12 @@ def upload_file():
         original_label = labels[original_class]
         adv_label = labels[adv_class]
 
+        adv_img = (adv_img * 255).astype(np.uint8)
+        adv_img = Image.fromarray(adv_img)
+        buffer = io.BytesIO()
+        adv_img.save(buffer, format='PNG')
+        adv_img = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
         return jsonify({
             "original_prediction": {
                 "class": int(original_class),
@@ -98,7 +105,8 @@ def upload_file():
             "adversarial_prediction": {
                 "class": int(adv_class),
                 "label" : adv_label,
-                "confidence": float(torch.softmax(adv_output, dim=1).max().item())
+                "confidence": float(torch.softmax(adv_output, dim=1).max().item()),
+                "adversarial_image": adv_img
             }
         })
     except Exception as e:

@@ -1,6 +1,7 @@
 import io
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from torchvision import models, transforms
 from torchvision.models import resnet50, ResNet50_Weights
 from torch.autograd import Variable
@@ -12,7 +13,10 @@ import base64
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+
+
 app = Flask(__name__)
+CORS(app)
 upload_folder = 'uploads'
 os.makedirs(upload_folder, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = upload_folder
@@ -83,7 +87,7 @@ def upload_file():
         adv_output = model(adv_img_tensor)
         adv_class = torch.argmax(adv_output, dim=1).item()
 
-        labels_path = './data/imagenet-simple-labels.json'
+        labels_path = '../data/imagenet-simple-labels.json'
         with open(labels_path) as f:
             labels = json.load(f)
 
